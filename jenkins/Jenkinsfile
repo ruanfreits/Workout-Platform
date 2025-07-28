@@ -9,8 +9,9 @@ pipeline {
                 docker { image 'maven' }
             }
             steps {
+            configFileProvider([configFile(fileId: '37568ccb-b1bc-447a-a416-3793483a5fcc', targetLocation: 'src/main/resources/application.properties')])
                 sh 'mvn package -Dmaven.test.skip=true'
-                sh 'mvn clean install -f pom.xml -Dspring-boot.run.arguments="--azure.config.url=https://url"'
+                sh 'mvn clean install -f pom.xml'
             }
         }
 
