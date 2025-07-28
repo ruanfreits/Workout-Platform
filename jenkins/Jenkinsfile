@@ -30,7 +30,6 @@ pipeline {
                     projectName: "${env.JOB_NAME}",
                     selector: specific ("${BUILD_NUMBER}"),
                     filter: 'target/*.jar',
-                    target: 'target'
                 )
                 script {
                     sh 'ls target'
