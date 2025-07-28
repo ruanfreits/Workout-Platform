@@ -1,0 +1,66 @@
+# Diretórios de build
+/target/
+/build/
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.tmp
+*.swp
+
+# Utilizar o SonarQube para analise de código
+comandoSonar.txt
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# IDEs
+# IntelliJ
+.idea/
+*.iml
+*.iws
+out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VSCode
+.vscode/
+
+# Arquivos do Maven
+.mvn/
+!/.mvn/wrapper/maven-wrapper.jar
+
+# Arquivos do Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Arquivos de ambiente
+.env
+.env.*
+
+# Arquivos do sistema
+*.bak
+*.orig
+
+# Arquivos gerados
+*.class
+*.jar
+*.war
+*.ear
+
+# Testes
+test-output/
+
+# Arquivos de cobertura de testes
+jacoco.exec
+coverage-reports/
+
+# Arquivos de configuração local
+application.properties
+sonar-project.properties

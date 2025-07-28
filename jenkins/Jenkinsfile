@@ -1,0 +1,25 @@
+#!/usr/bin/env groovy
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Build-Jar-File') {
+            agent {
+                docker { image 'maven' }
+            }
+            steps {
+                sh 'mvn package -Dmaven.test.skip=true'
+                sh 'mvn clean install -f pom.xml -Dspring-boot.run.arguments="--azure.config.url=https://url"'
+            }
+        }
+
+        stage('Build-Image') {
+            steps {
+                script {
+                    app = docker.build("gym-project/test")
+                }
+            }
+        }
+    }
+}
