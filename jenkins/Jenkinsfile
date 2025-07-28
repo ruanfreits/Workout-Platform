@@ -15,11 +15,17 @@ pipeline {
                 sh 'mvn clean install -f pom.xml'
                 }
             }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'target/*.jar', onlyIfSuccessful: true
+                }
         }
+    }
 
         stage('Build-Image') {
             steps {
                 script {
+                    step ([$class: 'CopyArtifact', projectName: "${env.JOB_NAME}", selector: [$class: 'LastSuccessfulBuildSelector'], filter: "target/*.jar", target: 'target/']);
                     app = docker.build("gym-project/test")
                 }
             }
