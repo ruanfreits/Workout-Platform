@@ -32,7 +32,7 @@ pipeline {
                     filter: 'target/*.jar',
                 )
                 script {
-                    sh 'ls target'
+                    sh 'ls target/*.jar'
                     app = docker.build("gym-project/test")
                 }
             }
