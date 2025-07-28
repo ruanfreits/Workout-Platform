@@ -28,7 +28,7 @@ pipeline {
             steps {
                 copyArtifacts(
                     projectName: "${env.JOB_NAME}",
-                    selector: lastSuccessful(),
+                    selector: specific ("${BUILD_NUMBER}")
                     filter: 'target/*.jar',
                     target: 'target'
                 )
