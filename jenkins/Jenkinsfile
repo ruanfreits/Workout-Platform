@@ -29,8 +29,8 @@ pipeline {
                 copyArtifacts(
                     projectName: "${env.JOB_NAME}",
                     selector: lastSuccessful(),
-                    artifact: 'target/*.jar',
-                    targetDirectory: 'target'
+                    filter: 'target/*.jar',
+                    target: 'target'
                 )
                 script {
                     sh 'ls target'
