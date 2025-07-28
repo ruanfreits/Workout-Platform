@@ -13,8 +13,10 @@ pipeline {
                 sh 'cp $APP_PROPS src/main/resources/application.properties'
                 sh 'mvn package -Dmaven.test.skip=true'
                 sh 'mvn clean install -f pom.xml'
+                // stash(name: 'my-artifact', includes: 'target/*.jar')
                 }
             }
+
             post {
                 always {
                     archiveArtifacts artifacts: 'target/*.jar', onlyIfSuccessful: true
@@ -24,8 +26,14 @@ pipeline {
 
         stage('Build-Image') {
             steps {
+                copyArtifacts(
+                    projectName: "${env.JOB_NAME}",
+                    selector: lastSuccessful(),
+                    artifact: 'target/*.jar',
+                    targetDirectory: 'target'
+                )
                 script {
-                    step ([$class: 'CopyArtifact', projectName: "${env.JOB_NAME}", selector: [$class: 'LastSuccessfulBuildSelector'], filter: "target/*.jar", target: 'target/']);
+                    sh 'ls target'
                     app = docker.build("gym-project/test")
                 }
             }
