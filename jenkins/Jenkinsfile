@@ -5,6 +5,7 @@ pipeline {
     
     environment{
         DOCKER_CREDS = credentials('github-Container-creds')
+        IMAGE_TAGGED = "ghcr.io/ruanfreits/workout-platform-backend:latest"
     }
     stages {
         stage('Login to Docker') {
@@ -44,7 +45,8 @@ pipeline {
                 script {
                     sh 'ls target/*.jar'
                     app = docker.build("gym-project/test")
-                    sh 'docker '
+                    sh 'docker tag gym-project/test:latest \$IMAGE_TAGGED'
+                    sh 'docker push \$IMAGE_TAGGED'
                 }
             }
         }
