@@ -50,5 +50,13 @@ pipeline {
                 }
             }
         }
+        stage('Deploy'){
+            steps{
+                sshagent(credentials: ['remote-user']) {
+                        sh '''
+                            ssh vboxuser@192.168.0.72 "docker pull \$IMAGE_TAGGED && docker run -d  -p 8080:8080 --name java_api \$IMAGE_TAGGED"
+                        '''
+                    }
+        }
     }
 }
