@@ -54,6 +54,7 @@ pipeline {
             steps{
                 sshagent(credentials: ['remote-user']) {
                         sh '''
+                            chmod 600 ~/.ssh/id_rsa || true
                             ssh vboxuser@192.168.0.72 "docker pull \$IMAGE_TAGGED && docker run -d  -p 8080:8080 --name java_api \$IMAGE_TAGGED"
                         '''
                     }
