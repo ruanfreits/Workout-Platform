@@ -52,10 +52,9 @@ pipeline {
         }
         stage('Deploy'){
             steps{
-                    withCredentials([sshUserPrivateKey(credentialsId: 'remote-user', keyFileVariable:'SSH_KEY')]) {
+                sshagent(credentials: ['remote-user']) {
                         sh '''
-                            chmod 600 $SSH_KEY
-                            ssh -i $SSH_KEY vboxuser@192.168.0.72 "docker pull \$IMAGE_TAGGED && docker run -d  -p 8080:8080 --name java_api \$IMAGE_TAGGED"
+                            ssh vboxuser@192.168.0.72 "docker pull \$IMAGE_TAGGED && docker run -d  -p 8080:8080 --name java_api \$IMAGE_TAGGED"
                         '''
                     }
         }
