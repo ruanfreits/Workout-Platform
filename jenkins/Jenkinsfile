@@ -6,6 +6,7 @@ pipeline {
     environment{
         DOCKER_CREDS = credentials('github-Container-creds')
         IMAGE_TAGGED = "ghcr.io/ruanfreits/workout-platform-backend:latest"
+        PRIVATE_KEY_FILE = 'id_rsa_temp'
     }
     stages {
         stage('Login to Docker') {
@@ -52,9 +53,12 @@ pipeline {
         }
         stage('Deploy'){
             steps{
-                sshagent(credentials: ['remote-user']) {
+                withCredentials([sshUserPrivateKey(credentialsId: 'remote-user', keyFileVariable: 'SSH_KEY')]) {
                         sh '''
-                            ssh -o StrictHostKeyChecking=no vboxuser@192.168.0.72 '
+                            cp "$SSH_KEY" $PRIVATE_KEY_FILE
+                            chmod 600 $PRIVATE_KEY_FILE
+
+                            ssh -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no  vboxuser@192.168.0.72 '
                             docker pull \$IMAGE_TAGGED &&
                             docker rm -f java_api || true &&
                             docker run -d  -p 8080:8080 --name java_api \$IMAGE_TAGGED'
