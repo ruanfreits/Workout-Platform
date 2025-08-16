@@ -54,7 +54,10 @@ pipeline {
             steps{
                 sshagent(credentials: ['remote-user']) {
                         sh '''
-                            ssh vboxuser@192.168.0.72 "docker pull \$IMAGE_TAGGED && docker run -d  -p 8080:8080 --name java_api \$IMAGE_TAGGED"
+                            ssh -o StrictHostKeyChecking=no vboxuser@192.168.0.72 '
+                            docker pull \$IMAGE_TAGGED &&
+                            docker rm -f java_api || true &&
+                            docker run -d  -p 8080:8080 --name java_api \$IMAGE_TAGGED'
                         '''
                     }
         }
