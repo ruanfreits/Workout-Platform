@@ -55,13 +55,15 @@ pipeline {
             steps{
                 withCredentials([sshUserPrivateKey(credentialsId: 'jenkins-remote', keyFileVariable: 'SSH_KEY')]) {
                         sh '''
-                            rm -f id_rsa_temp
-                            install -m 600 $SSH_KEY $PRIVATE_KEY_FILE
+                            rm -f /tmp/jenkins_keys/id_rsa_temp || true &&
+
+                            mkdir -p /tmp/jenkins_keys
+                            install -m 600 $SSH_KEY /tmp/jenkins_keys/$PRIVATE_KEY_FILE
                             
-                            ls -l
+                            ls -l /tmp/jenkins_keys
 
                             
-                            ssh -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no  vboxuser@192.168.0.72 '
+                            ssh -i /tmp/jenkins_keys/$PRIVATE_KEY_FILE -o StrictHostKeyChecking=no  vboxuser@192.168.0.72 '
                             docker pull ghcr.io/ruanfreits/workout-platform-backend:latest &&
                             docker rm -f java_api || true &&
                             docker run -d  -p 8080:8080 --name java_api ghcr.io/ruanfreits/workout-platform-backend:latest'
