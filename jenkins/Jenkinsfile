@@ -53,15 +53,15 @@ pipeline {
         }
         stage('Deploy'){
             steps{
-                withCredentials([sshUserPrivateKey(credentialsId: 'remote-user', keyFileVariable: 'SSH_KEY')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: 'jenkins-remote', keyFileVariable: 'SSH_KEY')]) {
                         sh '''
-                            cp "$SSH_KEY" $PRIVATE_KEY_FILE
-                            chmod 600 $PRIVATE_KEY_FILE
+                            cp "$SSH_KEY" $PRIVATE_KEY_FILE &&
+                            chmod 600 $PRIVATE_KEY_FILE &&
 
                             ssh -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no  vboxuser@192.168.0.72 '
-                            docker pull \$IMAGE_TAGGED &&
+                            docker pull ghcr.io/ruanfreits/workout-platform-backend:latest &&
                             docker rm -f java_api || true &&
-                            docker run -d  -p 8080:8080 --name java_api \$IMAGE_TAGGED'
+                            docker run -d  -p 8080:8080 --name java_api ghcr.io/ruanfreits/workout-platform-backend:latest'
                         '''
                     }
         }
