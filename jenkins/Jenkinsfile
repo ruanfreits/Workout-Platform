@@ -64,6 +64,7 @@ pipeline {
 
                             
                             ssh -i /tmp/jenkins_keys/$PRIVATE_KEY_FILE -o StrictHostKeyChecking=no  vboxuser@192.168.0.72 '
+                            ls -l /home
                             docker pull ghcr.io/ruanfreits/workout-platform-backend:latest &&
                             docker rm -f java_api || true &&
                             docker run -d  -p 8080:8080 --name java_api ghcr.io/ruanfreits/workout-platform-backend:latest'
