@@ -23,8 +23,11 @@ pipeline {
             steps {
                 configFileProvider([configFile(fileId: '37568ccb-b1bc-447a-a416-3793483a5fcc',variable: 'APP_PROPS')]){
                 sh 'cp $APP_PROPS src/main/resources/application.properties'
-                sh 'mvn package -Dmaven.test.skip=true'
-                sh 'mvn clean install -f pom.xml'
+                sh 'mvn package -Dmaven.test.skip=true -Dmaven.repo.local=$WORKSPACE/.m2/repository'
+                sh 'mvn clean install -Dmaven.repo.local=$WORKSPACE/.m2/repository'
+                
+                //sh 'mvn package -Dmaven.test.skip=true'
+               // sh 'mvn clean install -f pom.xml'
                 // stash(name: 'my-artifact', includes: 'target/*.jar')
                 }
             }
