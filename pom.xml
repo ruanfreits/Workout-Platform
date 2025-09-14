@@ -189,5 +189,6 @@
 			</plugin>
 		</plugins>
 	</build>
+<localRepository>/var/lib/jenkins/.m2/repository</localRepository>
 
 </project>
