@@ -16,14 +16,6 @@ pipeline {
                 sh "docker login -u \$DOCKER_CREDS_USR -p \$DOCKER_CREDS_PSW ghcr.io"
             }
         }
-        stage('Maven Sonarqube') {
-            steps {
-                // Use the DOCKER_CREDS environment variable, which automatically
-                // provides DOCKER_CREDS_USR and DOCKER_CREDS_PSW
-                sh "Echo 'Step Sonarqube' "
-            }
-        }
-        
         stage('Build-Jar-File') {
             agent {
                 docker { image 'maven' }
