@@ -24,12 +24,12 @@ pipeline {
         stage('Sonarqube Scan'){
             agent{
                 docker {
-                    image 'maven:3.9.8-eclipse-temurin-21'
-                    args '-v $WORKSPACE/.m2:/root/.m2'
+                    image 'maven'
                 }  
             }
             steps{
                 withCredentials([string(credentialsId: 'sonarToken', variable: 'SONAR_TOKEN'), string(credentialsId: 'sonarUrl', variable: 'SONAR_URL')]){
+                                    sh 'mvn package -Dmaven.test.skip=true -Dmaven.repo.local=$WORKSPACE/.m2/repository'
                                     sh 'mvn clean verify sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.projectKey=projeto-bulkhouse -Dsonar.host.url=$SONAR_URL'
                 }
             }
