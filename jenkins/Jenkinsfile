@@ -7,6 +7,11 @@ pipeline {
         DOCKER_CREDS = credentials('github-Container-creds')
         IMAGE_TAGGED = "ghcr.io/ruanfreits/workout-platform-backend:latest"
         PRIVATE_KEY_FILE = 'id_rsa_temp'
+
+        AWS_REGION = 'us-east-1'
+        ECR_REPO = 'workout-platform-backend'
+        AWS_ACCOUNT_ID = '102183953907'
+        URL_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
     }
     stages {
         stage('Login to Docker') {
@@ -14,6 +19,16 @@ pipeline {
                 // Use the DOCKER_CREDS environment variable, which automatically
                 // provides DOCKER_CREDS_USR and DOCKER_CREDS_PSW
                 sh "docker login -u \$DOCKER_CREDS_USR -p \$DOCKER_CREDS_PSW ghcr.io"
+            }
+        }
+        stage('Sonarqube Scan'){
+            agent{
+                docker {image 'maven'}  
+            }
+            steps{
+                withCredentials([string(credentialsId: 'sonarToken', variable: 'SONAR_TOKEN'), string(credentialsId: 'sonarUrl', variable: 'SONAR_URL')]){
+                                    sh 'mvn clean verify sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.projectKey=projeto-bulkhouse -Dsonar.host.url=$SONAR_URL'
+                }
             }
         }
         stage('Build-Jar-File') {
@@ -26,9 +41,6 @@ pipeline {
                 sh 'mvn package -Dmaven.test.skip=true -Dmaven.repo.local=$WORKSPACE/.m2/repository'
                 sh 'mvn clean install -Dmaven.repo.local=$WORKSPACE/.m2/repository'
                 
-                //sh 'mvn package -Dmaven.test.skip=true'
-               // sh 'mvn clean install -f pom.xml'
-                // stash(name: 'my-artifact', includes: 'target/*.jar')
                 }
             }
 
@@ -47,34 +59,36 @@ pipeline {
                     filter: 'target/*.jar',
                 )
                 script {
-                    sh 'ls target/*.jar'
-                    app = docker.build("gym-project/test")
-                    sh 'docker tag gym-project/test:latest \$IMAGE_TAGGED'
-                    sh 'docker push \$IMAGE_TAGGED'
+                    withCredentials([usernamePassword(credentialsId: 'ecr-demo-credentials', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]){
+                sh "/usr/local/bin/aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${URL_REGISTRY}"
+                sh "docker build -t $ECR_REPO ."
+                sh "docker tag $ECR_REPO:latest ${URL_REGISTRY}/$ECR_REPO:latest"
+                sh "docker push ${URL_REGISTRY}/$ECR_REPO:latest"
+                }
                 }
             }
         }
-        stage('Deploy'){
-            steps{
-                withCredentials([sshUserPrivateKey(credentialsId: 'jenkins-remote', keyFileVariable: 'SSH_KEY')]) {
-                        sh '''
-                            rm -f /tmp/jenkins_keys/id_rsa_temp || true &&
+    //     stage('Deploy'){
+    //         steps{
+    //             withCredentials([sshUserPrivateKey(credentialsId: 'jenkins-remote', keyFileVariable: 'SSH_KEY')]) {
+    //                     sh '''
+    //                         rm -f /tmp/jenkins_keys/id_rsa_temp || true &&
 
-                            mkdir -p /tmp/jenkins_keys
-                            install -m 600 $SSH_KEY /tmp/jenkins_keys/$PRIVATE_KEY_FILE
+    //                         mkdir -p /tmp/jenkins_keys
+    //                         install -m 600 $SSH_KEY /tmp/jenkins_keys/$PRIVATE_KEY_FILE
                             
-                            ls -l /tmp/jenkins_keys
+    //                         ls -l /tmp/jenkins_keys
 
                             
-                            ssh -i /tmp/jenkins_keys/$PRIVATE_KEY_FILE -o StrictHostKeyChecking=no  vboxuser@192.168.0.72 '
-                            ls -l /home
-                            docker pull ghcr.io/ruanfreits/workout-platform-backend:latest &&
-                            docker rm -f java_api || true &&
-                            docker run -d  -p 8080:8080 --name java_api ghcr.io/ruanfreits/workout-platform-backend:latest'
-                        '''
-                    }
-        }
-    }
+    //                         ssh -i /tmp/jenkins_keys/$PRIVATE_KEY_FILE -o StrictHostKeyChecking=no  vboxuser@192.168.0.72 '
+    //                         ls -l /home
+    //                         docker pull ghcr.io/ruanfreits/workout-platform-backend:latest &&
+    //                         docker rm -f java_api || true &&
+    //                         docker run -d  -p 8080:8080 --name java_api ghcr.io/ruanfreits/workout-platform-backend:latest'
+    //                     '''
+    //                 }
+    //     }
+    // }
 
     }
 }
