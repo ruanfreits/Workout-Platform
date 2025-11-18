@@ -21,19 +21,7 @@ pipeline {
                 sh "docker login -u \$DOCKER_CREDS_USR -p \$DOCKER_CREDS_PSW ghcr.io"
             }
         }
-        stage('Sonarqube Scan'){
-            agent{
-                docker {
-                    image 'maven'
-                }  
-            }
-            steps{
-                withCredentials([string(credentialsId: 'sonarToken', variable: 'SONAR_TOKEN'), string(credentialsId: 'sonarUrl', variable: 'SONAR_URL')]){
-                                    sh 'mvn package -Dmaven.test.skip=true -Dmaven.repo.local=$WORKSPACE/.m2/repository'
-                                    sh 'mvn clean verify sonar:sonar -Dmaven.repo.local=$WORKSPACE/.m2/repository -Dsonar.login=$SONAR_TOKEN -Dsonar.projectKey=projeto-bulkhouse -Dsonar.host.url=$SONAR_URL'
-                }
-            }
-        }
+
         stage('Build-Jar-File') {
             agent {
                 docker { image 'maven' }
@@ -53,6 +41,20 @@ pipeline {
                 }
         }
     }
+
+            stage('Sonarqube Scan'){
+            agent{
+                docker {
+                    image 'maven'
+                }  
+            }
+            steps{
+                withCredentials([string(credentialsId: 'sonarToken', variable: 'SONAR_TOKEN'), string(credentialsId: 'sonarUrl', variable: 'SONAR_URL')]){
+                                    sh 'mvn package -Dmaven.test.skip=true -Dmaven.repo.local=$WORKSPACE/.m2/repository'
+                                    sh 'mvn clean verify sonar:sonar -Dmaven.repo.local=$WORKSPACE/.m2/repository -Dsonar.login=$SONAR_TOKEN -Dsonar.projectKey=projeto-bulkhouse -Dsonar.host.url=$SONAR_URL'
+                }
+            }
+        }
 
         stage('Build-Image') {
             steps {
